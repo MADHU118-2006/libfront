@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Book Finder | Cloud-Based Library Book Finder</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; font-family:'Poppins',sans-serif;}
+  body { min-height:100vh; background: linear-gradient(rgba(10,20,40,0.8), rgba(10,20,40,0.8)), url("libimg2.jpg") no-repeat center center/cover; color:#fff; display:flex; flex-direction:column; align-items:center;}
+
+  /* Navigation Bar */
+  nav { width:100%; background: rgba(30,60,114,0.95); padding:10px 50px; display:flex; justify-content:space-between; align-items:center; box-shadow: 0 4px 12px rgba(0,0,0,0.4);}
+  nav .logo { font-size:24px; font-weight:700; color:#fff; letter-spacing:1px;}
+  nav .user-dropdown { position:relative; cursor:pointer; }
+  nav .user-dropdown span { padding:8px 12px; background: rgba(255,255,255,0.1); border-radius:6px; transition:0.3s; }
+  nav .user-dropdown span:hover { background: rgba(255,255,255,0.2);}
+  nav .dropdown-content { display:none; position:absolute; right:0; top:110%; background-color:#1e3c72; min-width:180px; border-radius:8px; overflow:hidden; box-shadow:0 5px 15px rgba(0,0,0,0.5);}
+  nav .dropdown-content a { display:block; padding:12px 16px; color:#fff; text-decoration:none; font-weight:500; transition:0.3s; }
+  nav .dropdown-content a:hover { background:#145a96; }
+  nav .user-dropdown:hover .dropdown-content { display:block; }
+
+  .content { width:90%; max-width:1100px; padding:20px 0; flex:1; display:flex; flex-direction:column; align-items:center;}
+
+  h1 { font-size:36px; margin-bottom:10px; text-shadow:0 2px 8px rgba(0,0,0,0.6);}
+  p.description { font-size:16px; margin-bottom:25px; text-align:center; color:#dcdcdc; text-shadow:0 1px 4px rgba(0,0,0,0.5); max-width:700px;}
+
+  .search-filters { display:flex; flex-wrap:wrap; gap:15px; margin-bottom:30px; justify-content:center; width:100%; }
+  .search-filters input, .search-filters select, .search-filters button {
+    padding:12px 15px; border-radius:8px; border:none; outline:none; font-size:16px;
+  }
+  .search-filters input, .search-filters select { min-width:200px; }
+  .search-filters button { background:#28a745; color:#fff; font-weight:600; cursor:pointer; transition:0.3s; }
+  .search-filters button:hover { background:#1e7e34; transform:scale(1.05); }
+
+  .results { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:25px; width:100%; margin-bottom:50px; }
+
+  .book-card { background:rgba(255,255,255,0.05); padding:20px; border-radius:12px; box-shadow:0 8px 20px rgba(0,0,0,0.3); transition:0.3s; display:flex; flex-direction:column; justify-content:space-between;}
+  .book-card:hover { background:rgba(255,255,255,0.1); transform:translateY(-5px);}
+  .book-card h3 { font-size:18px; margin-bottom:10px; color:#fff; }
+  .book-card p { font-size:14px; color:#cfd8dc; margin-bottom:8px; }
+
+  .btn-reserve { margin-top:auto; text-align:center; padding:10px 15px; border-radius:8px; font-weight:600; cursor:pointer; transition:0.3s; display:inline-block; text-decoration:none; }
+  .btn-reserve.reserve { background:#007bff; color:#fff;}
+  .btn-reserve.reserve:hover { background:#0056b3; transform:scale(1.05);}
+  .btn-reserve.reserved { background:#6c757d; cursor:default; }
+
+  footer { font-size:13px; color:#cfd8dc; text-shadow:0 0 5px rgba(0,0,0,0.6); padding:15px 0; width:100%; text-align:center; background:rgba(0,0,0,0.2);}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">📚 Cloud Library</div>
+  <div class="user-dropdown">
+    <span id="userName">Account</span>
+    <div class="dropdown-content">
+      <a href="reserve.html">View My Reservations</a>
+      <a href="#" onclick="logout()">Logout</a>
+    </div>
+  </div>
+</nav>
+
+<div class="content">
+  <h1>Find Your Book</h1>
+  <p class="description">Search for books by title, author, or ISBN. Filter by category or availability. Reserve your books in just a click.</p>
+
+  <div class="search-filters">
+    <input type="text" id="searchInput" placeholder="Enter book title, author or ISBN">
+    <select id="categoryFilter">
+      <option value="">All Categories</option>
+      <option value="fiction">Fiction</option>
+      <option value="nonfiction">Non-Fiction</option>
+      <option value="science">Science</option>
+      <option value="history">History</option>
+    </select>
+    <select id="availabilityFilter">
+      <option value="">All</option>
+      <option value="available">Available</option>
+      <option value="reserved">Reserved</option>
+    </select>
+    <button onclick="renderBooks()">Search</button>
+  </div>
+
+  <div class="results" id="results"></div>
+</div>
+
+<footer>© 2025 Cloud-Based Library Book Finder</footer>
+
+<script>
+const API_URL = "http://localhost:5000/api/books";
+
+// Show logged user
+let currentUser = JSON.parse(localStorage.getItem("currentUser"));
+document.getElementById("userName").textContent = currentUser?.name || "Account";
+
+// Fetch & render books
+async function renderBooks() {
+  const search = document.getElementById("searchInput").value;
+  const category = document.getElementById("categoryFilter").value;
+  const availability = document.getElementById("availabilityFilter").value;
+
+  const res = await fetch(`${API_URL}?search=${search}&category=${category}&availability=${availability}`);
+  const books = await res.json();
+
+  const results = document.getElementById("results");
+  results.innerHTML = "";
+
+  books.forEach(book => {
+    const card = document.createElement("div");
+    card.className = "book-card";
+
+    card.innerHTML = `
+      <h3>${book.title}</h3>
+      <p>Author: ${book.author}</p>
+      <p>Category: ${book.category}</p>
+      <p>Availability: ${book.availability}</p>
+      <a class="btn-reserve ${book.availability === "Reserved" ? "reserved" : "reserve"}">
+        ${book.availability === "Reserved" ? "Reserved" : "Reserve"}
+      </a>
+    `;
+
+    const btn = card.querySelector(".btn-reserve");
+
+    if (book.availability === "Available") {
+      btn.addEventListener("click", async () => {
+        await fetch(`${API_URL}/reserve/${book._id}`, {
+          method: "POST"
+        });
+        alert(`You reserved "${book.title}"`);
+        renderBooks();
+      });
+    }
+
+    results.appendChild(card);
+  });
+}
+
+// Filters
+document.getElementById("searchInput").addEventListener("input", renderBooks);
+document.getElementById("categoryFilter").addEventListener("change", renderBooks);
+document.getElementById("availabilityFilter").addEventListener("change", renderBooks);
+
+// Logout
+function logout() {
+  localStorage.removeItem("currentUser");
+  alert("Logged out!");
+  window.location.href = "login.html";
+}
+
+renderBooks();
+</script>
+
+
+</body>
+</html>
+
+
+
+
+
+
+  
+
+

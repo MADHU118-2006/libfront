@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Library Login | Cloud-Based Library Book Finder</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Poppins", sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #1e3c72, #2a5298);
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .login-container {
+      background: #fff;
+      padding: 40px 50px;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      width: 380px;
+      text-align: center;
+      animation: fadeIn 1s ease-in;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .login-container h2 {
+      color: #1e3c72;
+      margin-bottom: 10px;
+      font-size: 26px;
+    }
+
+    .login-container p {
+      color: #555;
+      font-size: 14px;
+      margin-bottom: 30px;
+    }
+
+    .input-group {
+      position: relative;
+      margin-bottom: 25px;
+    }
+
+    .input-group input {
+      width: 100%;
+      padding: 12px 15px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      outline: none;
+      font-size: 16px;
+      transition: 0.3s;
+    }
+
+    .input-group input:focus {
+      border-color: #2a5298;
+      box-shadow: 0 0 5px rgba(42, 82, 152, 0.4);
+    }
+
+    .login-btn {
+      background: #2a5298;
+      color: #fff;
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .login-btn:hover {
+      background: #1e3c72;
+    }
+
+    .options {
+      margin-top: 20px;
+      font-size: 14px;
+    }
+
+    .options a {
+      color: #2a5298;
+      text-decoration: none;
+      font-weight: 600;
+      margin: 0 5px;
+    }
+
+    .options a:hover {
+      text-decoration: underline;
+    }
+
+    .footer {
+      margin-top: 25px;
+      font-size: 12px;
+      color: #aaa;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="login-container">
+    <h2>Welcome Back</h2>
+    <p>Login to access your Library Dashboard</p>
+
+    <form id="loginForm">
+      <div class="input-group">
+        <input type="email" id="email" placeholder="Email" required />
+      </div>
+      <div class="input-group">
+        <input type="password" id="password" placeholder="Password" required />
+      </div>
+      <button type="submit" class="login-btn">Login</button>
+    </form>
+
+    <div class="options">
+      <p>Don't have an account? <a href="register.html">Sign Up</a></p>
+      <a href="#">Forgot Password?</a>
+    </div>
+
+    <div class="footer">
+      © 2025 Cloud-Based Library Book Finder
+    </div>
+  </div>
+
+<script>
+document.getElementById("loginForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  const res = await fetch("http://localhost:5000/api/auth/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password }),
+  });
+
+  const data = await res.json();
+
+  if (res.ok) {
+    // STORE LOGIN DATA
+    localStorage.setItem("token", data.token);
+    localStorage.setItem("userId", data.user._id);
+
+    // REDIRECT
+    window.location.href = "dashboard.html";
+  } else {
+    alert(data.error);
+  }
+});
+</script>
+
+
+</body>
+</html>

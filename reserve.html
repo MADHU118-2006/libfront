@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reserved Books | Cloud-Based Library Book Finder</title>
+<style>
+  * {margin:0; padding:0; box-sizing:border-box; font-family:"Poppins",sans-serif;}
+  
+  body { 
+    min-height:100vh; 
+    display:flex; 
+    flex-direction:column; 
+    align-items:center; 
+    text-align:center; 
+    color:#fff; 
+    background: linear-gradient(rgba(10,20,40,0.7), rgba(10,20,40,0.7)), 
+                url("libimg2.jpg") no-repeat center center/cover; 
+  }
+
+  header { 
+    width:100%; 
+    padding:20px 40px; 
+    font-size:22px; 
+    font-weight:600; 
+    letter-spacing:1px; 
+    color:#e3f2fd; 
+    text-shadow:0 0 5px rgba(0,0,0,0.4); 
+    text-align:left; 
+  }
+
+  h1 { 
+    margin:20px 0 10px; 
+    font-size:36px; 
+    font-weight:700; 
+    text-shadow:0 2px 10px rgba(0,0,0,0.5); 
+  }
+
+  #reservedBooksContainer {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+    width: 90%;
+    margin-bottom: 20px;
+  }
+
+  .book-card { 
+    background: rgba(255,255,255,0.1); 
+    padding: 20px; 
+    border-radius:12px; 
+    box-shadow:0 5px 15px rgba(0,0,0,0.3); 
+    width: 250px; 
+    transition:0.3s; 
+    position: relative; 
+  }
+
+  .book-card:hover { 
+    background: rgba(255,255,255,0.2); 
+    transform: translateY(-3px); 
+  }
+
+  .book-card h2 { color:#e3f2fd; margin-bottom:10px; font-size:18px;}
+  .book-card p { color:#cfd8dc; font-size:14px; margin-bottom:8px;}
+
+  .details-btn, .reserve-btn, .cancel-btn, .confirm-cancel-btn, .back-btn, .exit-cancel-btn { 
+    margin-top:10px; padding:10px 20px; border:none; border-radius:8px; font-weight:600; cursor:pointer; transition:0.3s; text-decoration:none; display:inline-block; 
+  }
+
+  .details-btn { background-color:#007bff; color:#fff; }
+  .details-btn:hover { background-color:#0056b3; transform: scale(1.05); }
+
+  .reserve-btn { background-color:#28a745; color:#fff; }
+  .reserve-btn:hover { background-color:#1e7e34; transform: scale(1.05); }
+
+  .cancel-btn { background-color:#dc3545; color:#fff; }
+  .cancel-btn:hover { background-color:#a71d2a; transform: scale(1.05); }
+
+  .confirm-cancel-btn { background-color:#ffc107; color:#000; margin-top:10px; }
+  .confirm-cancel-btn:hover { background-color:#e0a800; transform: scale(1.05); }
+
+  .exit-cancel-btn { background-color:#17a2b8; color:#fff; margin-top:10px; }
+  .exit-cancel-btn:hover { background-color:#117a8b; transform: scale(1.05); }
+
+  input.select-checkbox { position:absolute; top:10px; right:10px; transform: scale(1.5); display:none; }
+  .select-mode input.select-checkbox { display:block; }
+
+  footer { font-size:13px; color:#cfd8dc; text-shadow:0 0 3px rgba(0,0,0,0.5); margin-bottom:15px; }
+</style>
+</head>
+<body>
+
+<header>📚 Cloud-Based Library Book Finder</header>
+<h1>Your Reserved Books</h1>
+
+<div id="reservedBooksContainer"></div>
+
+<div style="margin-top:20px;">
+  <button class="cancel-btn" id="startCancelBtn">Cancel Reservation</button>
+  <button class="confirm-cancel-btn" id="confirmCancelBtn" style="display:none;">Confirm Cancel Reservation</button>
+  <button class="exit-cancel-btn" id="exitCancelBtn" style="display:none;">Exit Cancel Mode</button>
+  <a href="main.html" class="back-btn">Back to Search</a>
+</div>
+
+<footer>© 2025 Cloud-Based Library Book Finder</footer>
+
+<script>
+const API_URL = "http://localhost:5000/api/reservations";
+const USER_ID = localStorage.getItem("userId");
+
+let reservedBooks = [];
+let cancelMode = false;
+
+const container = document.getElementById('reservedBooksContainer');
+const startCancelBtn = document.getElementById('startCancelBtn');
+const confirmCancelBtn = document.getElementById('confirmCancelBtn');
+const exitCancelBtn = document.getElementById('exitCancelBtn');
+
+
+// -----------------------------
+// 1️⃣ FETCH RESERVED BOOKS FROM BACKEND
+// -----------------------------
+async function loadReservations() {
+  try {
+    const res = await fetch(`${API_URL}/user/${USER_ID}`);
+    reservedBooks = await res.json();
+    renderReservedBooks();
+  } catch (error) {
+    console.error("Error loading reservations:", error);
+  }
+}
+
+
+// -----------------------------
+// 2️⃣ RESERVE A BOOK USING BACKEND
+// -----------------------------
+async function reserveBook(bookId) {
+  try {
+    const res = await fetch(`${API_URL}/reserve`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId: USER_ID, bookId })
+    });
+
+    const data = await res.json();
+    alert(data.message);
+
+    loadReservations();
+  } catch (error) {
+    console.error("Reserve error:", error);
+  }
+}
+
+
+// -----------------------------
+// 3️⃣ CANCEL RESERVATION USING BACKEND
+// -----------------------------
+async function cancelReservation(reservationId, bookId) {
+  try {
+    const res = await fetch(`${API_URL}/cancel`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ reservationId, bookId })
+    });
+
+    const data = await res.json();
+    alert(data.message);
+
+    loadReservations();
+  } catch (error) {
+    console.error("Cancel error:", error);
+  }
+}
+
+
+// -----------------------------
+// 4️⃣ RENDER CARDS
+// -----------------------------
+function renderReservedBooks() {
+  container.innerHTML = '';
+
+  if (reservedBooks.length === 0) {
+    container.innerHTML = "<p>You have no reserved books yet.</p>";
+    startCancelBtn.style.display = 'none';
+    confirmCancelBtn.style.display = 'none';
+    exitCancelBtn.style.display = 'none';
+    return;
+  }
+
+  startCancelBtn.style.display = 'inline-block';
+
+  reservedBooks.forEach(item => {
+    const card = document.createElement('div');
+    card.className = 'book-card';
+    if (cancelMode) card.classList.add('select-mode');
+
+    card.innerHTML = `
+      <h2>${item.bookId.title}</h2>
+      <p><strong>Author:</strong> ${item.bookId.author}</p>
+      <p><strong>Category:</strong> ${item.bookId.category}</p>
+
+      <button class="details-btn">View Details</button>
+
+      <button class="cancel-btn" style="display:${cancelMode ? 'block' : 'none'};">
+        Cancel Reservation
+      </button>
+
+      <input type="checkbox" 
+             class="select-checkbox" 
+             data-resid="${item._id}" 
+             data-book="${item.bookId._id}">
+    `;
+
+    // View details
+    card.querySelector('.details-btn').addEventListener('click', () => {
+      alert(item.bookId.description || "No description available.");
+    });
+
+    container.appendChild(card);
+  });
+}
+
+
+// -----------------------------
+// 5️⃣ CANCEL MODE BUTTONS
+// -----------------------------
+
+startCancelBtn.addEventListener('click', () => {
+  cancelMode = true;
+  confirmCancelBtn.style.display = 'inline-block';
+  exitCancelBtn.style.display = 'inline-block';
+  startCancelBtn.style.display = 'none';
+  renderReservedBooks();
+});
+
+exitCancelBtn.addEventListener('click', () => {
+  cancelMode = false;
+  confirmCancelBtn.style.display = 'none';
+  exitCancelBtn.style.display = 'none';
+  startCancelBtn.style.display = 'inline-block';
+  renderReservedBooks();
+});
+
+confirmCancelBtn.addEventListener('click', async () => {
+  const checkboxes = document.querySelectorAll('.select-checkbox');
+  let selected = [];
+
+  checkboxes.forEach(cb => {
+    if (cb.checked) {
+      selected.push({
+        reservationId: cb.dataset.resid,
+        bookId: cb.dataset.book
+      });
+    }
+  });
+
+  if (selected.length === 0) {
+    alert("Please select a reservation to cancel.");
+    return;
+  }
+
+  for (let item of selected) {
+    await cancelReservation(item.reservationId, item.bookId);
+  }
+
+  cancelMode = false;
+  confirmCancelBtn.style.display = 'none';
+  exitCancelBtn.style.display = 'none';
+  startCancelBtn.style.display = 'inline-block';
+
+  loadReservations();
+});
+
+
+// -----------------------------
+// INITIAL LOAD
+// -----------------------------
+loadReservations();
+</script>
+
+
+</body>
+</html>
+
+
+
+

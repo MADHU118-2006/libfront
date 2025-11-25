@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Cloud Integration</title>
+<style>
+body { font-family: 'Poppins', sans-serif; padding: 40px; background: #f5f7fa; }
+h2 { text-align: center; margin-bottom: 20px; }
+.container { max-width: 600px; margin: auto; background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+button { padding: 8px 12px; margin-top: 10px; border-radius: 6px; background: #007bff; color: #fff; border: none; cursor: pointer; }
+button:hover { background: #0056b3; }
+ul { list-style: none; padding: 0; }
+li { padding: 8px 0; border-bottom: 1px solid #ddd; }
+</style>
+</head>
+<body>
+
+<div class="container">
+<h2>Cloud Integration Module</h2>
+
+<input type="file" id="fileInput">
+<button onclick="uploadFile()">Upload File</button>
+
+<h3>Uploaded Files</h3>
+<ul id="fileList"></ul>
+</div>
+
+<script>
+const token = localStorage.getItem("token"); // JWT token from login
+
+async function uploadFile() {
+  const fileInput = document.getElementById("fileInput");
+  const file = fileInput.files[0];
+  if (!file) return alert("Select a file first!");
+
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const res = await fetch("http://localhost:5000/api/cloud/upload", {
+    method: "POST",
+    headers: { Authorization: "Bearer " + token },
+    body: formData
+  });
+
+  const data = await res.json();
+  if (res.ok) {
+    alert("File uploaded: " + data.url);
+    fetchFiles();
+  } else {
+    alert("Upload failed: " + data.message);
+  }
+}
+
+async function fetchFiles() {
+  const res = await fetch("http://localhost:5000/api/cloud/files", {
+    headers: { Authorization: "Bearer " + token }
+  });
+  const files = await res.json();
+  const fileList = document.getElementById("fileList");
+  fileList.innerHTML = "";
+  files.forEach(f => {
+    const li = document.createElement("li");
+    li.innerHTML = `<a href="${f.url}" target="_blank">${f.name}</a>`;
+    fileList.appendChild(li);
+  });
+}
+
+fetchFiles();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Dashboard | Cloud-Based Library Book Finder</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;font-family:"Poppins",sans-serif}
+  body{
+    min-height:100vh;
+    color:#fff;
+    background:
+      linear-gradient(rgba(10,20,40,0.65), rgba(10,20,40,0.65)),
+      url("libimg1.jpg") no-repeat center center/cover;
+  }
+
+  /* Header */
+  header{
+    position:fixed;top:0;left:0;right:0;
+    height:64px;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:0 28px;
+    background:rgba(0,0,0,0.4);
+    z-index:1200;
+    box-shadow:0 4px 18px rgba(0,0,0,0.4);
+  }
+  .menu-btn{font-size:26px;cursor:pointer;user-select:none}
+  .account-dropdown{position:relative;cursor:pointer}
+  .account-label{padding:8px 12px;border-radius:8px;background:rgba(255,255,255,0.06)}
+  .dropdown-menu{
+    display:none;position:absolute;right:0;top:46px;
+    background:rgba(0,0,0,0.86);border-radius:8px;overflow:hidden;
+    min-width:170px;box-shadow:0 8px 30px rgba(0,0,0,0.6)
+  }
+  .dropdown-menu a{display:block;padding:10px 14px;color:#fff;text-decoration:none}
+  .dropdown-menu a:hover{background:#145a96}
+
+  /* Sidebar */
+  .sidebar{
+    position:fixed;left:-260px;top:0;height:100%;width:260px;
+    background:rgba(0,0,0,0.92);padding-top:84px;transition:left .28s ease;
+    z-index:1100;
+  }
+  .sidebar.active{left:0}
+  .sidebar a{display:block;padding:14px 20px;color:#fff;text-decoration:none;font-size:15px}
+  .sidebar a:hover{background:#0b63c6;border-radius:6px}
+
+  /* Page content */
+  .content{max-width:1150px;margin:100px auto 60px;padding:0 20px}
+
+  h1{font-size:30px;margin-bottom:8px}
+  p.lead{color:#e6eef8;margin-bottom:22px;max-width:800px}
+
+  .cards-container{display:flex;gap:18px;flex-wrap:wrap;margin-bottom:28px;justify-content:center}
+  .card{
+    width:220px;background:rgba(255,255,255,0.06);padding:18px;border-radius:12px;
+    box-shadow:0 8px 24px rgba(0,0,0,0.35);text-align:center;transition:transform .18s,background .18s;
+  }
+  .card:hover{transform:translateY(-6px);background:rgba(255,255,255,0.12)}
+  .card h3{font-size:18px;color:#fff;margin-bottom:8px}
+  .card p{color:#d7e5f5;font-size:20px;font-weight:700}
+
+  /* Popular books (rolling) */
+  .popular-books-section{margin:28px auto 20px;width:100%;max-width:1000px;overflow:hidden}
+  .popular-books-section h2{margin-bottom:14px;text-align:center}
+  .books-track{
+    display:flex;gap:18px;align-items:stretch;
+    animation:scrollBooks 22s linear infinite;
+    will-change:transform;
+  }
+  .books-track:hover{animation-play-state:paused}
+  /* Duplicate track will be created in markup for seamless loop */
+  .book-item{
+    min-width:170px;background:rgba(255,255,255,0.06);padding:12px;border-radius:10px;
+    text-align:center;color:#fff;box-shadow:0 8px 20px rgba(0,0,0,0.35);transition:transform .18s,background .18s;
+  }
+  .book-item img{width:110px;height:150px;object-fit:cover;border-radius:6px;margin-bottom:8px;display:block;margin-left:auto;margin-right:auto}
+  .book-item h4{font-size:15px;margin:6px 0 4px}
+  .book-item p.author{font-size:13px;color:#d7e5f5;margin-bottom:8px}
+
+  /* Buttons inside book item */
+  .book-item .btn-row{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+  .btn {
+    padding:8px 12px;border-radius:8px;border:none;font-weight:600;cursor:pointer;transition:transform .12s,opacity .12s;
+    font-size:13px;
+  }
+  .btn:active{transform:translateY(1px)}
+  .btn-view { background:#bff2b2;color:#053b06; } /* light green */
+  .btn-view:hover { background:#9be08a; }
+  .btn-reserve { background:#007bff;color:#fff; } /* blue */
+  .btn-reserve:hover { background:#0056b3; }
+
+  @keyframes scrollBooks {
+    0% { transform:translateX(0); }
+    100% { transform:translateX(-50%); } /* track duplicated, so -50% scroll shows seamless loop */
+  }
+
+  /* Modal */
+  .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);align-items:center;justify-content:center;z-index:1500}
+  .modal .box{background:#fff;color:#000;border-radius:12px;padding:20px;max-width:520px;width:92%;position:relative}
+  .modal .close{position:absolute;right:12px;top:8px;font-size:20px;cursor:pointer}
+
+  footer{text-align:center;padding:18px 0;color:#cfe0f5;margin-top:28px}
+
+  @media(max-width:820px){
+    .books-track{animation-duration:30s}
+    .card{width:46%}
+  }
+  @media(max-width:480px){
+    .card{width:80%}
+    .books-track{animation-duration:36s}
+    .book-item img{width:90px;height:120px}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="menu-btn" id="menuBtn" aria-label="Menu">☰</div>
+  <div class="account-dropdown" id="accountBtn">
+    <div class="account-label" id="accountLabel">User Name ▾</div>
+    <div class="dropdown-menu" id="accountMenu">
+      <a href="reserve.html">View Reservations</a>
+      <a href="#" id="logoutTop">Logout</a>
+    </div>
+  </div>
+</header>
+
+<!-- Sidebar (hamburger) -->
+<nav class="sidebar" id="sidebar">
+  <a href="main.html">Search Books</a>
+  <a href="reserve.html">Reserved Books</a>
+  <a href="yourdetails.html">Your Details</a>
+  <a href="admin_dashboard.html">Admin Dashboard</a>
+
+  <a href="#" id="logoutSide">Logout</a>
+</nav>
+
+<!-- Content -->
+<main class="content" role="main">
+  <h1>Welcome back</h1>
+  <p class="lead">This is your library dashboard. Check quick stats below and explore popular books — they roll like a train across the screen. Hover to pause.</p>
+
+  <div class="cards-container" aria-hidden="false">
+    <div class="card">
+      <h3>Total Books</h3>
+      <p id="statTotal">—</p>
+    </div>
+    <div class="card">
+      <h3>Reserved (You)</h3>
+      <p id="statReserved">—</p>
+    </div>
+    <div class="card">
+      <h3>Active Users</h3>
+      <p id="statUsers">—</p>
+    </div>
+  </div>
+
+  <!-- Popular books carousel: 7 unique items, then duplicates for smooth animation -->
+  <section class="popular-books-section" aria-label="Popular books">
+    <h2>Popular Books</h2>
+
+    <div class="books-track" id="booksTrack">
+      <!-- 7 unique book items -->
+      <div class="book-item" data-title="Book Title 1" data-author="Author 1" data-desc="Description for Book 1">
+        <img src="book1.jpg" alt="Book Title 1">
+        <h4>Book Title 1</h4>
+        <p class="author">Author 1</p>
+        <div class="btn-row">
+          <button class="btn btn-view" onclick="openDetails(this)">View</button>
+          <button class="btn btn-reserve" onclick="reserveFromCarousel(this)">Reserve</button>
+        </div>
+      </div>
+
+      <div class="book-item" data-title="Book Title 2" data-author="Author 2" data-desc="Description for Book 2">
+        <img src="book2.jpg" alt="Book Title 2">
+        <h4>Book Title 2</h4>
+        <p class="author">Author 2</p>
+        <div class="btn-row">
+          <button class="btn btn-view" onclick="openDetails(this)">View</button>
+          <button class="btn btn-reserve" onclick="reserveFromCarousel(this)">Reserve</button>
+        </div>
+      </div>
+
+      <div class="book-item" data-title="Book Title 3" data-author="Author 3" data-desc="Description for Book 3">
+        <img src="book3.jpg" alt="Book Title 3">
+        <h4>Book Title 3</h4>
+        <p class="author">Author 3</p>
+        <div class="btn-row">
+          <button class="btn btn-view" onclick="openDetails(this)">View</button>
+          <button class="btn btn-reserve" onclick="reserveFromCarousel(this)">Reserve</button>
+        </div>
+      </div>
+
+      <div class="book-item" data-title="Book Title 4" data-author="Author 4" data-desc="Description for Book 4">
+        <img src="book4.jpg" alt="Book Title 4">
+        <h4>Book Title 4</h4>
+        <p class="author">Author 4</p>
+        <div class="btn-row">
+          <button class="btn btn-view" onclick="openDetails(this)">View</button>
+          <button class="btn btn-reserve" onclick="reserveFromCarousel(this)">Reserve</button>
+        </div>
+      </div>
+
+      <div class="book-item" data-title="Book Title 5" data-author="Author 5" data-desc="Description for Book 5">
+        <img src="book5.jpg" alt="Book Title 5">
+        <h4>Book Title 5</h4>
+        <p class="author">Author 5</p>
+        <div class="btn-row">
+          <button class="btn btn-view" onclick="openDetails(this)">View</button>
+          <button class="btn btn-reserve" onclick="reserveFromCarousel(this)">Reserve</button>
+        </div>
+      </div>
+
+      <div class="book-item" data-title="Book Title 6" data-author="Author 6" data-desc="Description for Book 6">
+        <img src="book6.jpg" alt="Book Title 6">
+        <h4>Book Title 6</h4>
+        <p class="author">Author 6</p>
+        <div class="btn-row">
+          <button class="btn btn-view" onclick="openDetails(this)">View</button>
+          <button class="btn btn-reserve" onclick="reserveFromCarousel(this)">Reserve</button>
+        </div>
+      </div>
+
+      <div class="book-item" data-title="Book Title 7" data-author="Author 7" data-desc="Description for Book 7">
+        <img src="book7.jpg" alt="Book Title 7">
+        <h4>Book Title 7</h4>
+        <p class="author">Author 7</p>
+        <div class="btn-row">
+          <button class="btn btn-view" onclick="openDetails(this)">View</button>
+          <button class="btn btn-reserve" onclick="reserveFromCarousel(this)">Reserve</button>
+        </div>
+      </div>
+
+      <!-- duplicate first 7 items for seamless loop (you can duplicate programmatically too) -->
+      <div class="book-item" data-title="Book Title 1" data-author="Author 1" data-desc="Description for Book 1">
+        <img src="book1.jpg" alt="Book Title 1">
+        <h4>Book Title 1</h4>
+        <p class="author">Author 1</p>
+        <div class="btn-row"><button class="btn btn-view" onclick="openDetails(this)">View</button><button class="btn btn-reserve" onclick="reserveFromCarousel(this)">Reserve</button></div>
+      </div>
+      <div class="book-item" data-title="Book Title 2" data-author="Author 2" data-desc="Description for Book 2">
+        <img src="book2.jpg" alt="Book Title 2">
+        <h4>Book Title 2</h4>
+        <p class="author">Author 2</p>
+        <div class="btn-row"><button class="btn btn-view" onclick="openDetails(this)">View</button><button class="btn btn-reserve" onclick="reserveFromCarousel(this)">Reserve</button></div>
+      </div>
+      <div class="book-item" data-title="Book Title 3" data-author="Author 3" data-desc="Description for Book 3">
+        <img src="book3.jpg" alt="Book Title 3">
+        <h4>Book Title 3</h4>
+        <p class="author">Author 3</p>
+        <div class="btn-row"><button class="btn btn-view" onclick="openDetails(this)">View</button><button class="btn btn-reserve" onclick="reserveFromCarousel(this)">Reserve</button></div>
+      </div>
+      <div class="book-item" data-title="Book Title 4" data-author="Author 4" data-desc="Description for Book 4">
+        <img src="book4.jpg" alt="Book Title 4">
+        <h4>Book Title 4</h4>
+        <p class="author">Author 4</p>
+        <div class="btn-row"><button class="btn btn-view" onclick="openDetails(this)">View</button><button class="btn btn-reserve" onclick="reserveFromCarousel(this)">Reserve</button></div>
+      </div>
+      <div class="book-item" data-title="Book Title 5" data-author="Author 5" data-desc="Description for Book 5">
+        <img src="book5.jpg" alt="Book Title 5">
+        <h4>Book Title 5</h4>
+        <p class="author">Author 5</p>
+        <div class="btn-row"><button class="btn btn-view" onclick="openDetails(this)">View</button><button class="btn btn-reserve" onclick="reserveFromCarousel(this)">Reserve</button></div>
+      </div>
+      <div class="book-item" data-title="Book Title 6" data-author="Author 6" data-desc="Description for Book 6">
+        <img src="book6.jpg" alt="Book Title 6">
+        <h4>Book Title 6</h4>
+        <p class="author">Author 6</p>
+        <div class="btn-row"><button class="btn btn-view" onclick="openDetails(this)">View</button><button class="btn btn-reserve" onclick="reserveFromCarousel(this)">Reserve</button></div>
+      </div>
+      <div class="book-item" data-title="Book Title 7" data-author="Author 7" data-desc="Description for Book 7">
+        <img src="book7.jpg" alt="Book Title 7">
+        <h4>Book Title 7</h4>
+        <p class="author">Author 7</p>
+        <div class="btn-row"><button class="btn btn-view" onclick="openDetails(this)">View</button><button class="btn btn-reserve" onclick="reserveFromCarousel(this)">Reserve</button></div>
+      </div>
+
+    </div><!-- .books-track -->
+  </section>
+
+</main>
+
+<!-- Modal for details -->
+<div class="modal" id="detailsModal" aria-hidden="true">
+  <div class="box" role="dialog" aria-modal="true">
+    <div class="close" id="closeModal">✕</div>
+    <h3 id="modalTitle">Title</h3>
+    <p id="modalAuthor" style="color:#333;margin:6px 0 12px;font-weight:600"></p>
+    <p id="modalDescription" style="color:#333;line-height:1.4"></p>
+  </div>
+</div>
+
+<footer>© 2025 Cloud-Based Library Book Finder</footer>
+
+<script>
+
+/* ---------- Dashboard Data Loading from Backend ---------- */
+async function loadDashboard() {
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    console.error("No token found — redirecting to login...");
+    window.location.href = "login.html";
+    return;
+  }
+
+  try {
+    const res = await fetch("http://localhost:5000/api/dashboard/stats", {
+      headers: {
+        Authorization: "Bearer " + token,
+      },
+    });
+
+    if (!res.ok) {
+      throw new Error("Failed to fetch dashboard stats");
+    }
+
+    const data = await res.json();
+
+    // Update values from backend
+    document.getElementById("statTotal").textContent = data.totalBooks;
+    document.getElementById("statReserved").textContent = data.reserved;
+    document.getElementById("statUsers").textContent = data.activeUsers;
+
+    // Store for later use & offline support
+    localStorage.setItem("totalBooks", data.totalBooks);
+    localStorage.setItem("activeUsers", data.activeUsers);
+
+  } catch (error) {
+    console.warn("Backend unreachable, using saved data...", error);
+
+    // Fallback values
+    document.getElementById('statTotal').textContent =
+      localStorage.getItem('totalBooks') || 1500;
+
+    document.getElementById('statReserved').textContent =
+      (JSON.parse(localStorage.getItem('reservedBooks') || '[]')).length;
+
+    document.getElementById('statUsers').textContent =
+      localStorage.getItem('activeUsers') || 320;
+  }
+}
+
+loadDashboard();
+
+/* ---------- Basic data & UI init ---------- */
+const username =
+  localStorage.getItem("username") ||
+  localStorage.getItem("loggedUserName") ||
+  "User Name";
+
+document.getElementById("accountLabel").textContent = username + " ▾";
+
+/* ---------- Sidebar ---------- */
+const sidebar = document.getElementById("sidebar");
+const menuBtn = document.getElementById("menuBtn");
+menuBtn.addEventListener("click", () => sidebar.classList.toggle("active"));
+
+/* ---------- Account Dropdown ---------- */
+const accountBtn = document.getElementById("accountBtn");
+const accountMenu = document.getElementById("accountMenu");
+
+accountBtn.addEventListener("mouseenter", () => (accountMenu.style.display = "block"));
+accountBtn.addEventListener("mouseleave", () => (accountMenu.style.display = "none"));
+
+/* ---------- Logout ---------- */
+document.getElementById("logoutTop").addEventListener("click", logout);
+document.getElementById("logoutSide").addEventListener("click", logout);
+
+function logout() {
+  localStorage.removeItem("token");
+  localStorage.removeItem("loggedUserName");
+  window.location.href = "login.html";
+}
+
+/* ---------- Modal (Book Details) ---------- */
+const detailsModal = document.getElementById("detailsModal");
+const closeModal = document.getElementById("closeModal");
+
+const modalTitle = document.getElementById("modalTitle");
+const modalAuthor = document.getElementById("modalAuthor");
+const modalDescription = document.getElementById("modalDescription");
+
+function openDetails(button) {
+  const item = button.closest(".book-item");
+  modalTitle.textContent = item.dataset.title;
+  modalAuthor.textContent = "By " + item.dataset.author;
+  modalDescription.textContent = item.dataset.desc;
+
+  detailsModal.style.display = "flex";
+}
+
+closeModal.addEventListener("click", () => {
+  detailsModal.style.display = "none";
+});
+
+detailsModal.addEventListener("click", (e) => {
+  if (e.target === detailsModal) detailsModal.style.display = "none";
+});
+
+/* ---------- Reserve Logic ---------- */
+function reserveFromCarousel(btn) {
+  const item = btn.closest(".book-item");
+  const title = item.dataset.title;
+
+  let reserved = JSON.parse(localStorage.getItem("reservedBooks") || "[]");
+
+  if (reserved.some((b) => b.title === title)) {
+    alert(`"${title}" is already in your reservations.`);
+    return;
+  }
+
+  reserved.push({
+    title,
+    author: item.dataset.author,
+    description: item.dataset.desc,
+    availability: "Reserved",
+  });
+
+  localStorage.setItem("reservedBooks", JSON.stringify(reserved));
+
+  document.getElementById("statReserved").textContent = reserved.length;
+
+  btn.textContent = "Reserved";
+  btn.disabled = true;
+  btn.style.opacity = "0.7";
+
+  alert(`You reserved "${title}".`);
+}
+
+/* Disable reserve buttons for already reserved books */
+function refreshReserveButtons() {
+  const reserved = JSON.parse(localStorage.getItem("reservedBooks") || "[]");
+  const titles = reserved.map((b) => b.title);
+
+  document.querySelectorAll(".book-item").forEach((item) => {
+    const reserveBtn = item.querySelector(".btn-reserve");
+    if (titles.includes(item.dataset.title)) {
+      reserveBtn.textContent = "Reserved";
+      reserveBtn.disabled = true;
+      reserveBtn.style.opacity = "0.7";
+    } else {
+      reserveBtn.textContent = "Reserve";
+      reserveBtn.disabled = false;
+      reserveBtn.style.opacity = "1";
+    }
+  });
+}
+
+refreshReserveButtons();
+
+/* Pause animation when browser tab is inactive */
+document.addEventListener("visibilitychange", () => {
+  document.getElementById("booksTrack").style.animationPlayState =
+    document.hidden ? "paused" : "running";
+});
+
+</script>
+</body>
+</html>
+

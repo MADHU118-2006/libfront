@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>View Reservations</title>
+<style>
+body { 
+    font-family: 'Poppins', sans-serif; 
+    background: #f8fbff; 
+    padding: 40px; 
+}
+h2 { 
+    text-align: center; 
+    color: #333; 
+    margin-bottom: 30px; 
+}
+table {
+    width: 85%;
+    margin: auto;
+    border-collapse: collapse;
+    background: white;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    border-radius: 8px;
+    overflow: hidden;
+}
+th, td {
+    padding: 12px;
+    border: 1px solid #ddd;
+    text-align: center;
+}
+th { 
+    background: #007bff; 
+    color: white; 
+}
+tr:hover { 
+    background: #f1f1f1; 
+}
+.no-data {
+    text-align: center;
+    font-style: italic;
+    color: #666;
+}
+.delete {
+    background: #dc3545;
+    color: white;
+    padding: 6px 10px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 600;
+}
+</style>
+</head>
+<body>
+
+<h2>All Reservations</h2>
+
+<table>
+<tr>
+    <th>Reservation ID</th>
+    <th>User ID</th>
+    <th>Book ID</th>
+    <th>Date</th>
+    <th>Action</th>
+</tr>
+
+<!-- Static sample reservation entries -->
+<tr>
+    <td>1</td>
+    <td>101</td>
+    <td>12</td>
+    <td>2025-02-05</td>
+    <td><a href="#" class="delete">Delete</a></td>
+</tr>
+
+<tr>
+    <td>2</td>
+    <td>102</td>
+    <td>7</td>
+    <td>2025-02-06</td>
+    <td><a href="#" class="delete">Delete</a></td>
+</tr>
+
+<tr>
+    <td>3</td>
+    <td>103</td>
+    <td>19</td>
+    <td>2025-02-07</td>
+    <td><a href="#" class="delete">Delete</a></td>
+</tr>
+
+</table>
+
+</body>
+</html>

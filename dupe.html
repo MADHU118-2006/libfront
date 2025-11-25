@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Your Details | Cloud-Based Library Book Finder</title>
+<style>
+  * {margin:0; padding:0; box-sizing:border-box; font-family:'Poppins',sans-serif;}
+  body {
+    background:linear-gradient(rgba(0,0,0,0.7),rgba(0,0,0,0.7)),url('libimg2.jpg') no-repeat center/cover;
+    color:#fff;
+    min-height:100vh;
+  }
+  header {
+    background:rgba(0,0,0,0.6);
+    display:flex; justify-content:space-between; align-items:center;
+    padding:12px 25px;
+    position:fixed; top:0; left:0; right:0;
+    box-shadow:0 2px 10px rgba(0,0,0,0.6);
+    z-index:10;
+    backdrop-filter: blur(6px);
+  }
+  header h2 {font-size:22px; letter-spacing:1px;}
+  header a {color:#00d9ff; text-decoration:none; font-weight:600; transition:0.3s;}
+  header a:hover {color:#fff;}
+  .content {
+    margin-top:120px;
+    max-width:950px;
+    background:rgba(255,255,255,0.08);
+    padding:35px;
+    border-radius:15px;
+    margin-left:auto;
+    margin-right:auto;
+    box-shadow:0 4px 25px rgba(0,0,0,0.6);
+    backdrop-filter: blur(8px);
+    animation: fadeIn 1s ease;
+  }
+  @keyframes fadeIn {from {opacity:0; transform:translateY(20px);} to {opacity:1; transform:translateY(0);}}
+  h1 {text-align:center; margin-bottom:25px; font-size:32px; color:#00d9ff; text-shadow:0 0 8px rgba(0,217,255,0.7);}
+  .profile-card {
+    display:flex; align-items:center; gap:25px; flex-wrap:wrap;
+    background:linear-gradient(135deg, rgba(0,0,0,0.5), rgba(0,0,0,0.7));
+    padding:25px;
+    border-radius:10px;
+    margin-bottom:30px;
+    border:1px solid rgba(255,255,255,0.1);
+    transition: transform .3s, box-shadow .3s;
+  }
+  .profile-card:hover {transform:translateY(-5px); box-shadow:0 0 25px rgba(0,217,255,0.3);}
+  .profile-card img {
+    width:120px; height:120px; border-radius:50%; object-fit:cover;
+    border:3px solid #00aaff; box-shadow:0 0 15px rgba(0,217,255,0.5);
+  }
+  .profile-info {flex:1;}
+  .profile-info h3 {font-size:22px; margin-bottom:8px;}
+  .profile-info p {color:#e0e0e0; margin:4px 0;}
+  .stats {display:flex; flex-wrap:wrap; gap:20px; justify-content:center; margin-top:20px;}
+  .stat-box {
+    background:rgba(255,255,255,0.1);
+    width:200px; padding:18px; border-radius:12px;
+    text-align:center; box-shadow:0 0 10px rgba(0,0,0,0.4);
+    transition:transform .3s, box-shadow .3s;
+  }
+  .stat-box:hover {transform:translateY(-5px); box-shadow:0 0 20px rgba(0,217,255,0.4);}
+  .stat-box h2 {font-size:24px; margin-bottom:6px; color:#00ffdd;}
+  .stat-box p {font-size:15px;}
+  .section {
+    margin-top:35px;
+    background:rgba(0,0,0,0.5);
+    padding:20px;
+    border-radius:12px;
+    border:1px solid rgba(255,255,255,0.1);
+  }
+  .section h2 {
+    font-size:22px;
+    margin-bottom:15px;
+    border-bottom:2px solid #00aaff;
+    padding-bottom:5px;
+  }
+  table {width:100%; border-collapse:collapse; margin-top:10px;}
+  th, td {
+    border:1px solid rgba(255,255,255,0.2);
+    padding:10px;
+    text-align:center;
+  }
+  th {background:rgba(0,0,0,0.6);}
+  td {background:rgba(255,255,255,0.1);}
+  .fine { color:#ff6666; font-weight:600; }
+  .due { color:#ffd166; }
+  .btn {
+    background:#007bff; border:none; color:#fff; padding:10px 18px;
+    border-radius:8px; font-weight:600; cursor:pointer;
+    transition:all .3s ease;
+  }
+  .btn:hover {background:#00b4d8; transform:scale(1.05);}
+  footer {text-align:center; margin-top:40px; color:#ccc; font-size:14px;}
+  @media(max-width:600px){
+    .profile-card {flex-direction:column; align-items:center;}
+    .profile-info {text-align:center;}
+    table {font-size:13px;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h2>📚 Library Book Finder</h2>
+  <a href="dashboard.html">Back to Dashboard</a>
+</header>
+
+<div class="content">
+  <h1>Your Account Details</h1>
+
+  <div class="profile-card">
+    <img id="userImg" src="user.jpg" alt="Profile Picture">
+    <div class="profile-info">
+      <h3 id="userName">User Name</h3>
+      <p><strong>Email:</strong> <span id="userEmail">user@example.com</span></p>
+      <p><strong>Member Since:</strong> <span id="userSince">January 2024</span></p>
+      <p><strong>Account Type:</strong> <span id="userType">Regular Member</span></p>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat-box"><h2 id="totalBooks">0</h2><p>Total Books</p></div>
+    <div class="stat-box"><h2 id="reservedBooks">0</h2><p>Reserved Books</p></div>
+    <div class="stat-box"><h2 id="pendingFine">₹0</h2><p>Pending Fine</p></div>
+  </div>
+
+  <div class="section">
+    <h2>📘 Reserved Books</h2>
+    <table id="reservedTable">
+      <tr><th>Book Title</th><th>Reservation Date</th><th>Due Date</th><th>Status</th></tr>
+    </table>
+  </div>
+
+  <div class="section"><h2>💰 Fine Details</h2><p id="fineMessage">No pending fines. Keep reading responsibly!</p></div>
+  <div class="section"><h2>🔔 Due Date Reminders</h2><p id="reminderMessage">No upcoming due dates yet.</p></div>
+
+  <div style="text-align:center; margin-top:25px;">
+    <button class="btn" onclick="editDetails()">Edit Details</button>
+  </div>
+</div>
+
+<footer>© 2025 Cloud-Based Library Book Finder</footer>
+
+<script>
+  // Load user info
+  const username = localStorage.getItem('loggedUserName') || 'User Name';
+  document.getElementById('userName').textContent = username;
+
+  const userDetails = JSON.parse(localStorage.getItem('userDetails') || '{}');
+  document.getElementById('userEmail').textContent = userDetails.email || 'user@example.com';
+  document.getElementById('userSince').textContent = userDetails.since || 'January 2024';
+  document.getElementById('userType').textContent = userDetails.type || 'Regular Member';
+
+  // Load reserved books
+  let reserved = JSON.parse(localStorage.getItem('reservedBooks') || '[]');
+  if(reserved.length === 0){
+    reserved = [
+      { title: "Data Science Essentials", date: "2025-10-15", due: "2025-11-10", status: "Active" },
+      { title: "Cloud Computing Basics", date: "2025-10-20", due: "2025-11-12", status: "Active" },
+      { title: "Artificial Intelligence 101", date: "2025-10-25", due: "2025-11-15", status: "Returned" }
+    ];
+    localStorage.setItem('reservedBooks', JSON.stringify(reserved));
+  }
+
+  const table = document.getElementById('reservedTable');
+  const today = new Date();
+  let hasDueSoon = false, totalFine = 0;
+
+  reserved.forEach(book => {
+    const row = document.createElement('tr');
+    const dueDate = new Date(book.due);
+    let statusText = book.status;
+    let fine = 0;
+
+    // If overdue → fine
+    if (book.status !== "Returned" && today > dueDate) {
+      statusText = "Overdue";
+      fine = Math.floor((today - dueDate) / (1000 * 60 * 60 * 24)) * 10;
+      totalFine += fine;
+    }
+
+    // If due within 3 days
+    const daysLeft = Math.ceil((dueDate - today) / (1000 * 60 * 60 * 24));
+    if (daysLeft <= 3 && daysLeft > 0 && book.status === "Active") {
+      statusText = "Due Soon";
+      hasDueSoon = true;
+    }
+
+    row.innerHTML = `
+      <td>${book.title}</td>
+      <td>${book.date}</td>
+      <td>${book.due}</td>
+      <td class="${statusText === 'Overdue' ? 'fine' : (statusText === 'Due Soon' ? 'due' : '')}">
+        ${statusText}${fine > 0 ? ` (₹${fine})` : ''}
+      </td>`;
+    table.appendChild(row);
+  });
+
+  // Save fine details persistently
+  localStorage.setItem('pendingFine', totalFine);
+
+  document.getElementById('reservedBooks').textContent = reserved.filter(b => b.status !== "Returned").length;
+  document.getElementById('totalBooks').textContent = reserved.length;
+  document.getElementById('pendingFine').textContent = '₹' + totalFine;
+  document.getElementById('fineMessage').textContent = totalFine > 0
+    ? `You have ₹${totalFine} pending fine. Please clear it soon.`
+    : "No pending fines. Keep reading responsibly!";
+  document.getElementById('reminderMessage').textContent = hasDueSoon
+    ? "⚠️ You have books due soon. Please return them on time!"
+    : "No upcoming due dates yet.";
+
+  function editDetails() {
+    const email = prompt("Enter new email:", userDetails.email || "");
+    if(email){
+      const type = prompt("Enter account type:", userDetails.type || "Regular Member");
+      const since = userDetails.since || "January 2024";
+      const updated = {email, type, since};
+      localStorage.setItem('userDetails', JSON.stringify(updated));
+      document.getElementById('userEmail').textContent = email;
+      document.getElementById('userType').textContent = type;
+      alert("Details updated successfully!");
+    }
+  }
+</script>
+</body>
+</html>

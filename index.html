@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cloud-Based Library Book Finder</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Poppins", sans-serif;
+    }
+
+    body {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      color: white;
+      background: 
+        linear-gradient(rgba(10, 20, 40, 0.7), rgba(10, 20, 40, 0.7)), 
+        url("libimg1.jpg") no-repeat center center/cover;
+      /* 🔹 Replace with your own background image name */
+      transition: background 0.3s ease;
+    }
+
+    header {
+      position: absolute;
+      top: 20px;
+      left: 40px;
+      font-size: 22px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      color: #e3f2fd;
+      text-shadow: 0 0 10px rgba(0,0,0,0.6);
+    }
+
+    .content {
+      max-width: 700px;
+      padding: 20px;
+      animation: fadeIn 1.5s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    h1 {
+      font-size: 42px;
+      font-weight: 700;
+      margin-bottom: 15px;
+      color: #ffffff;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.6);
+    }
+
+    p {
+      font-size: 17px;
+      margin-bottom: 30px;
+      line-height: 1.7;
+      color: #e0e0e0;
+      text-shadow: 0 1px 5px rgba(0, 0, 0, 0.5);
+    }
+
+    .buttons {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 12px 25px;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      font-weight: 600;
+      box-shadow: 0px 4px 12px rgba(0,0,0,0.3);
+    }
+
+    .btn:hover {
+      background-color: #0056b3;
+      transform: scale(1.05);
+    }
+
+    footer {
+      position: absolute;
+      bottom: 15px;
+      font-size: 13px;
+      color: #cfd8dc;
+      text-shadow: 0 0 6px rgba(0, 0, 0, 0.7);
+    }
+
+    @media (max-width: 768px) {
+      h1 { font-size: 30px; }
+      p { font-size: 14px; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>📚 Cloud-Based Library Book Finder</header>
+
+  <div class="content">
+    <h1>Welcome to Your Digital Library</h1>
+    <p>
+      A cloud-powered platform to search, locate, and reserve books anytime, anywhere.  
+      Find real-time availability, shelf locations, and get notified when books are returned.
+    </p>
+
+    <div class="buttons">
+      <a href="login.html" class="btn">Login</a>
+      <a href="register.html" class="btn">Sign Up</a>
+    </div>
+  </div>
+
+  <footer>
+    © 2025 Cloud-Based Library Book Finder | Developed for Academic Purpose
+  </footer>
+
+</body>
+</html>
+
+
+
